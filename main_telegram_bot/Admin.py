@@ -7,7 +7,7 @@ from aiogram.types import Message, MediaGroup, InputFile
 from aiogram.dispatcher import FSMContext, Dispatcher
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from main_telegram_bot.utils import StatesAdmin, StatesMal, StatesAdmins
+from main_telegram_bot.utils import StatesAdmin, StatesMal
 from main_telegram_bot.KeyboardButton import BUTTON_TYPES
 from main_telegram_bot.messages import MESSAGES
 from create_main_bot import dp, bot
@@ -311,14 +311,12 @@ async def add_del_city(message: Message):
             await bot.send_message(chat_id=message.from_user.id, text=MESSAGES["add_city"], reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
         else:
             await bot.send_message(chat_id=message.from_user.id, text=MESSAGES["del_city"], reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
-            btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
-
             all_name_city = db.get_keyboard()
             text = "<b>Все города в боте:</b>\n\n"
             for idx, name_city in enumerate(all_name_city):
-                btn['keyboard'].insert(idx, [{'text': f'{name_city[0]}'}])
                 text += f"<b>{idx+1}.</b> <code>{name_city[0]}</code>\n"
-            await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=btn, parse_mode="HTML")
+
+            await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
 
         state = dp.current_state(user=message.from_user.id)
         await state.update_data(what_city=message.text)
@@ -354,25 +352,17 @@ async def add_del_district(message: Message):
         text = MESSAGES["what_city"]
         all_name_city = db.get_keyboard()
         text += "\n\n<b>Все города в боте:</b>\n"
-        btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
         for idx, name_city in enumerate(all_name_city):
-            btn['keyboard'].insert(idx, [{'text': f'{name_city[0]}'}])
             text += f"<b>{idx+1}.</b> <code>{name_city[0]}</code>\n"
-        await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=btn, parse_mode="HTML")
+        await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
 
         state = dp.current_state(user=message.from_user.id)
         await state.update_data(what_city=message.text)
 
-        if message.text.lower() == "добавить продукт":
+        if message.text == "Добавить Продукт":
             await state.set_state(StatesAdmin.all()[8])
-        elif message.text.lower() == "удалить продукт":
+        elif message.text == "Удалить Продукт":
             await state.set_state(StatesAdmin.all()[8])
-
-        elif message.text.lower() == "добавить доп район":
-            await state.set_state(StatesAdmins.all()[0])
-        elif message.text.lower() == "удалить доп район":
-            await state.set_state(StatesAdmins.all()[3])
-
         else:
             await state.set_state(StatesAdmin.all()[6])
     else:
@@ -392,11 +382,9 @@ async def for_which_product(message: Message, state: FSMContext):
             except:
                 all_name_product = [all_name_product]
             text = "<u>Введите название ПРОДУКТА для которого будем добавлять/удалять район</u>\n\n<b>Все продукты в боте:</b>\n"
-            btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
             for idx, name_city in enumerate(all_name_product):
-                btn['keyboard'].insert(idx, [{'text': f'{name_city}'}])
                 text += f"<b>{idx + 1}.</b> <code>{name_city}</code>\n"
-            await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=btn, parse_mode="HTML")
+            await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
             await state.update_data(name_dis=message.text)
             await state.set_state(StatesAdmin.all()[2])
         except Exception as ex:
@@ -433,13 +421,11 @@ async def for_which_city(message: Message, state: FSMContext):
 
                     all_name_city = db.get_keyboard_district(data["name_dis"])[0].split("|")
                     text += "\n\n<b>Все Районы в боте:</b>\n"
-                    btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
                     for idx, name_city in enumerate(all_name_city):
                         if int(name_city[-2]) == int(index_product):
-                            btn['keyboard'].insert(idx, [{'text': f'{name_city}'}])
                             text += f"<b>{idx+1}.</b> <code>{name_city}</code>\n"
 
-                    await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=btn, parse_mode="HTML")
+                    await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
                     await state.update_data(name_pro=message.text)
                     if data["what_city"].lower() == 'добавить район' or data["what_city"].lower() == 'удалить район':
                         await state.set_state(StatesAdmin.all()[7])
@@ -492,12 +478,10 @@ async def input_product_name(message: Message, state: FSMContext):
                 text = MESSAGES["del_product"]
                 all_name_city = db.get_keyboard_products(message.text)[0].split("|")
                 text += "\n\n<b>Все Продукты в этом городе:</b>\n"
-                btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
                 for idx, name_city in enumerate(all_name_city):
-                    btn['keyboard'].insert(idx, [{'text': f'{name_city}'}])
                     text += f"<b>{idx+1}.</b> <code>{name_city}</code>\n"
 
-                await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=btn, parse_mode="HTML")
+                await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
                 await state.update_data(name_dis=message.text)
                 await state.set_state(StatesAdmin.all()[9])
 
@@ -523,88 +507,6 @@ async def add_del_product_name(message: Message, state: FSMContext):
 
         await message.answer(text=text_mes, reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
         await state.finish()
-
-
-# ===================================================
-# ============ ДОБАВИТЬ/УДАЛИТЬ ДОП РАЙОН ===========
-# ===================================================
-async def add_del_dop_district(message: Message, state: FSMContext):
-    if message.text.lower() == "отмена":
-        await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-        await state.finish()
-    else:
-        try:
-            text = "<u>Введите название РАЙОНА в котором будем  добавлять  доп район</u>\n\n<b>Все Районы в боте:</b>\n"
-            all_name_city = db.get_keyboard_district(message.text)[0].split("|")
-            products_name = db.get_keyboard_products(message.text)[0].split("|")
-            btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
-            for idx, name_city in enumerate(all_name_city):
-                btn['keyboard'].insert(idx, [{'text': f'{idx}|{name_city}'}])
-                text += f"<code>{idx}|{name_city}</code> - <b>{products_name[int(name_city.split('[')[1][:-1])]}</b>\n"
-            await state.update_data(distr=message.text)
-            await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=btn, parse_mode="HTML")
-            await state.set_state(StatesAdmins.all()[1])
-        except:
-            await bot.send_message(chat_id=message.from_user.id, text=MESSAGES["not_district"], reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
-            await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-            await state.finish()
-
-
-# ============ ДОБАВИТЬ ДОП РАЙОН ===========
-async def add_dop_district2(message: Message, state: FSMContext):
-    if message.text.lower() == "отмена":
-        await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-        await state.finish()
-    else:
-        text = "<b>Введите название ДОП РАЙОНА для ДОБАВЛЕНИЯ:</b>"
-        await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
-        await state.update_data(dis_prod=message.text)
-        await state.set_state(StatesAdmins.all()[2])
-
-
-# ============ ДОБАВИТЬ ДОП РАЙОН ===========
-async def add_dop_district3(message: Message, state: FSMContext):
-    if message.text.lower() == "отмена":
-        await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-        await state.finish()
-    else:
-        try:
-            data = await state.get_data()
-            if data["what_city"].lower() == "добавить доп район":
-                db.add_district(data["distr"], "dop_district", f"|{message.text}[{data['dis_prod'].split('|')[0]}]")
-                await message.answer(text="Добавил!", reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-            else:
-                db.del_district(message.text, "dop_district", data["distr"])
-                await message.answer(text="Удалил!", reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-            await state.finish()
-        except Exception as ex:
-            await bot.send_message(chat_id=message.from_user.id, text=MESSAGES["not_district"], reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
-            await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-            await state.finish()
-
-
-# ============ УДАЛИТЬ ДОП РАЙОН ===========
-async def del_dop_district2(message: Message, state: FSMContext):
-    if message.text.lower() == "отмена":
-        await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-        await state.finish()
-    else:
-        try:
-            text = "<u>Введите название ДОП РАЙОНА для удаления</u>\n\n<b>Все Доп Районы в боте:</b>\n"
-            all_name_city = db.get_keyboard_district(message.text)[0].split("|")
-            products_name = db.get_keyboard_products(message.text)[0].split("|")
-            dop_district_name = db.get_keyboard_dop_district(message.text)[0].split("|")
-            btn = {'keyboard': [[{'text': 'Отмена'}]], 'resize_keyboard': True}
-            for idx, name_city in enumerate(dop_district_name):
-                btn['keyboard'].insert(idx, [{'text': f'{name_city}'}])
-                text += f"<b>{idx+1}.</b> <code>{name_city}</code> => <b>{all_name_city[int(name_city.split('[')[1][:-1])]} => {products_name[int(all_name_city[int(name_city.split('[')[1][:-1])].split('[')[1][:-1])]}</b>\n"
-            await state.update_data(distr=message.text)
-            await message.answer(text=text, parse_mode="HTML", reply_markup=btn)
-            await state.set_state(StatesAdmins.all()[2])
-        except Exception as ex:
-            await bot.send_message(chat_id=message.from_user.id, text=MESSAGES["not_district"], reply_markup=BUTTON_TYPES["BTN_CANCEL"], parse_mode="HTML")
-            await message.answer(MESSAGES['start_admin'], reply_markup=BUTTON_TYPES["BTN_HOME_ADMIN"])
-            await state.finish()
 
 
 # ===================================================
@@ -781,7 +683,10 @@ async def unknown_command(message: Message):
 def register_handler_admin(dp: Dispatcher):
     all_malling_info = db.get_all_malling()
     for malling_info in all_malling_info:
-        scheduler.add_job(send_m, trigger='cron', hour=malling_info[1][0:2],minute=malling_info[1][3:5],start_date=datetime.now(), kwargs={"text_malling": malling_info[-1]}, id=f"{malling_info[0]}")
+        scheduler.add_job(send_m, trigger='cron', hour=malling_info[1][0:2],
+                          minute=malling_info[1][3:5],
+                          start_date=datetime.now(), kwargs={"text_malling": malling_info[-1]},
+                          id=f"{malling_info[0]}")
 
     # СТАРТ
     dp.register_message_handler(start_command, lambda message: message.text == '/start' or message.text == 'Главное меню')
@@ -819,7 +724,7 @@ def register_handler_admin(dp: Dispatcher):
     dp.register_message_handler(input_city_name, state=StatesAdmin.STATES_5)
 
     # ДОБАВИТЬ/УДАЛИТЬ РАЙОН
-    dp.register_message_handler(add_del_district, lambda message: message.text.lower() == 'добавить район' or message.text.lower() == 'удалить район' or message.text.lower() == 'добавить продукт' or message.text.lower() == 'удалить продукт' or message.text.lower() == 'добавить доп район' or message.text.lower() == 'удалить доп район')
+    dp.register_message_handler(add_del_district, lambda message: message.text.lower() == 'добавить район' or message.text.lower() == 'удалить район' or message.text.lower() == 'добавить продукт' or message.text.lower() == 'удалить продукт')
     dp.register_message_handler(for_which_product, state=StatesAdmin.STATES_6)
     dp.register_message_handler(for_which_city, state=StatesAdmin.STATES_2)
     dp.register_message_handler(input_district_name, state=StatesAdmin.STATES_7)
@@ -827,13 +732,6 @@ def register_handler_admin(dp: Dispatcher):
     # ДОБАВИТЬ/УДАЛИТЬ ПРОДУКТ
     dp.register_message_handler(input_product_name, state=StatesAdmin.STATES_8)
     dp.register_message_handler(add_del_product_name, state=StatesAdmin.STATES_9)
-
-    # ДОБАВИТЬ/УДАЛИТЬ ДОП РАЙОН
-    dp.register_message_handler(add_del_dop_district, state=StatesAdmins.STATE_0)
-    dp.register_message_handler(add_dop_district2, state=StatesAdmins.STATE_1)
-    dp.register_message_handler(add_dop_district3, state=StatesAdmins.STATE_2)
-
-    dp.register_message_handler(del_dop_district2, state=StatesAdmins.STATE_3)
 
     # СДЕЛАТЬ РАССЫЛКУ
     dp.register_message_handler(add_malling, lambda message: message.text.lower() == 'сделать рассылку')
