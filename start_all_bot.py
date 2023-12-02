@@ -390,7 +390,7 @@ def bot_init(event_loop, token, number_bot):
             await message.answer(MESSAGES["balance_pay"] % price_product[1][:-1])
         else:
             if len(id_product) == 6:
-                district_name = db.get_keyboard_city_id(id_product[3])[2].split("|")[int(id_product[5])].split("[")[0]
+                price_product = db.get_keyboard_city_id(id_product[3])[0].split("|")[int(id_product[5])].split("(")
             else:
                 district_name = db.get_keyboard_city_id(id_product[3])[3].split("|")[int(id_product[6])].split("[")[0]
             NUMBER_CARD = db.get_all_info("NUMBER_CARD")[0].split("|")
