@@ -22,7 +22,7 @@ def main():
 
 
 if __name__ == '__main__':
-    # subprocess.Popen(["/home/str/Alica/.venv/bin/python", "/home/str/Alica/telegram_bot/monitor.py"])
+    # subprocess.Popen(["/home/str/18orel/.venv/bin/python", "/home/str/18orel/telegram_bot/monitor.py"])
     subprocess.Popen(["/home/str/18orel/.venv/bin/python", "/home/str/18orel/telegram_bot/monitor.py"])
 
     main()
